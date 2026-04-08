@@ -1,0 +1,82 @@
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import { AlarmClock, Command, Wallet, LogOut } from "lucide-react";
+
+const sidebarItems = [
+  { label: "Alerts", icon: AlarmClock, href: "/alerts" },
+  { label: "Commands", icon: Command, href: "/commands" },
+  {
+    label: "Retail Collections",
+    icon: Wallet,
+    href: "/retail-collections",
+  },
+];
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const logout = () => {
+    localStorage.removeItem("sultan-controller-token");
+    router.push("/login");
+  };
+
+  return (
+    <div className="h-screen w-64 bg-card border-r flex flex-col justify-between">
+      {/* TOP */}
+      <div>
+        {/* Logo Section */}
+        <div className="p-6 border-b">
+          <h1 className="text-lg font-bold">⚡ Sultan Admin</h1>
+        </div>
+
+        {/* Navigation */}
+        <div className="p-3 space-y-2">
+          {sidebarItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (pathname === "/" && item.href === "/alerts");
+
+            return (
+              <motion.div
+                key={item.label}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <button
+                  onClick={() => router.push(item.href)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-2 rounded-xl transition",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted",
+                  )}
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* BOTTOM */}
+      <div className="p-4 border-t">
+        <Button
+          variant="destructive"
+          className="w-full flex items-center gap-2"
+          onClick={logout}
+        >
+          <LogOut size={16} />
+          Logout
+        </Button>
+      </div>
+    </div>
+  );
+}
