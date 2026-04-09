@@ -1,3 +1,5 @@
+export const runtime = "nodejs"; // 🔥 IMPORTANT
+
 import { Client } from "ssh2";
 
 export async function GET() {

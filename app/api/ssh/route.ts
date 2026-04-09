@@ -1,3 +1,5 @@
+export const runtime = "nodejs"; // 🔥 IMPORTANT
+
 import { NextResponse } from "next/server";
 import { Client } from "ssh2";
 
