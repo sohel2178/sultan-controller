@@ -1,10 +1,11 @@
-export const runtime = "nodejs"; // 🔥 IMPORTANT
+export const runtime = "nodejs"; // 🔥 required for ssh2
 
 import { NextResponse } from "next/server";
 import { Client } from "ssh2";
 
-function execCommand(conn: Client, command: string) {
-  return new Promise<string>((resolve, reject) => {
+// 🔧 helper to run command
+function execCommand(conn: Client, command: string): Promise<string> {
+  return new Promise((resolve, reject) => {
     conn.exec(command, (err, stream) => {
       if (err) return reject(err);
 
@@ -21,14 +22,15 @@ function execCommand(conn: Client, command: string) {
   });
 }
 
-export async function POST(req: Request) {
+// 🚀 API handler
+export async function POST(req: Request): Promise<Response> {
   const { action } = await req.json();
 
   if (action !== "restart-service") {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     const conn = new Client();
 
     conn
@@ -36,26 +38,25 @@ export async function POST(req: Request) {
         try {
           const steps: any[] = [];
 
-          // 🔥 STEP 1
-          steps.push({ step: "Changing directory..." });
-
-          // use full path instead of cd
           const basePath = "/home/sohel/projects";
 
+          // 🔥 STEP 1
+          steps.push({ step: "🚀 Connected to server" });
+
           // 🔥 STEP 2
-          steps.push({ step: "Stopping Docker stack..." });
+          steps.push({ step: "🛑 Stopping Docker stack..." });
           const stopOutput = await execCommand(
             conn,
             `cd ${basePath} && docker stack rm retail-apps-stack`,
           );
           steps.push({ output: stopOutput });
 
-          // 🔥 WAIT 30 sec
-          steps.push({ step: "Waiting 30 seconds..." });
+          // 🔥 STEP 3
+          steps.push({ step: "⏳ Waiting 30 seconds..." });
           await new Promise((r) => setTimeout(r, 30000));
 
-          // 🔥 STEP 3
-          steps.push({ step: "Deploying Docker stack..." });
+          // 🔥 STEP 4
+          steps.push({ step: "🚀 Deploying Docker stack..." });
           const deployOutput = await execCommand(
             conn,
             `cd ${basePath} && docker stack deploy -c docker-compose.yml retail-apps-stack`,
@@ -72,13 +73,27 @@ export async function POST(req: Request) {
           );
         } catch (err: any) {
           conn.end();
-          resolve(NextResponse.json({ error: err.message }, { status: 500 }));
+
+          resolve(
+            NextResponse.json(
+              { error: err.message || "Unknown error" },
+              { status: 500 },
+            ),
+          );
         }
       })
+      .on("error", (err) => {
+        resolve(
+          NextResponse.json(
+            { error: err.message || "SSH connection failed" },
+            { status: 500 },
+          ),
+        );
+      })
       .connect({
-        host: process.env.SSH_HOST,
-        username: process.env.SSH_USER,
-        privateKey: process.env.SSH_KEY,
+        host: process.env.SSH_HOST!, // 🔐 ensure set in Vercel
+        username: process.env.SSH_USER!, // 🔐
+        privateKey: process.env.SSH_KEY!, // 🔐
       });
   });
 }
