@@ -1,28 +1,48 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { AlarmClock, Command, Wallet, LogOut } from "lucide-react";
-
-const sidebarItems = [
-  { label: "Alerts", icon: AlarmClock, href: "/alerts" },
-  { label: "Commands", icon: Command, href: "/commands" },
-  {
-    label: "Retail Collections",
-    icon: Wallet,
-    href: "/retail-collections",
-  },
-];
+import { AlarmClock, Command, Wallet, LogOut, Server } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [role, setRole] = useState<string | null>(null);
+
+  // ✅ Load role properly
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+  }, []);
+
+  // ✅ Sidebar items dynamically generated
+  const sidebarItems = [
+    { label: "Alerts", icon: AlarmClock, href: "/alerts" },
+    { label: "Commands", icon: Command, href: "/commands" },
+    {
+      label: "Retail Collections",
+      icon: Wallet,
+      href: "/retail-collections",
+    },
+    ...(role === "superadmin"
+      ? [
+          {
+            label: "Server Controller",
+            icon: Server,
+            href: "/server-controller",
+          },
+        ]
+      : []),
+  ];
+
   const logout = () => {
-    localStorage.removeItem("sultan-controller-token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
     router.push("/login");
   };
 
@@ -30,12 +50,12 @@ export default function Sidebar() {
     <div className="h-screen w-64 bg-card border-r flex flex-col justify-between">
       {/* TOP */}
       <div>
-        {/* Logo Section */}
+        {/* Logo */}
         <div className="p-6 border-b">
           <h1 className="text-lg font-bold">⚡ Sultan Admin</h1>
         </div>
 
-        {/* Navigation */}
+        {/* NAV */}
         <div className="p-3 space-y-2">
           {sidebarItems.map((item) => {
             const isActive =

@@ -14,10 +14,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    // Hardcoded credentials
-    if (email === "admin@sultantracker.com" && password === "sultan123456") {
-      localStorage.setItem("sultan-controller-token", "admin-auth");
+  const handleLogin = async () => {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("token", "auth");
+      localStorage.setItem("role", data.role);
+
       router.push("/");
     } else {
       setError("❌ Invalid email or password");

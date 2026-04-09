@@ -3,11 +3,11 @@ import { Payment } from "@/types/payment";
 import { MonthlyPaymentRequest } from "@/types/report";
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5555";
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5555";
 
 // Create an axios instance
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: "/api/proxy", // 🔥 use proxy instead of backend
   headers: {
     "Content-Type": "application/json",
   },
@@ -24,13 +24,14 @@ api.interceptors.request.use((config) => {
 
 export const AlertAPI = {
   fetchLastAlertsByIMEI: async (imei: string, limit = 50) => {
-    const res = await api.get(`/alerts/admin`, {
+    const res = await api.get(`/alerts`, {
       params: { imei, limit },
     });
     return res.data;
   },
 
   remove: async (id: string): Promise<void> => {
+    console.log("Deleting alert with ID:", id); // Debug log
     await api.delete(`/alerts/${id}`);
   },
 };

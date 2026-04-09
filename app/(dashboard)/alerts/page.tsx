@@ -24,7 +24,7 @@ export default function AdminAlerts() {
     if (!isValidIMEI(imei)) return;
 
     try {
-      const data = await AlertAPI.fetchLastAlertsByIMEI(imei, 50);
+      const data = await AlertAPI.fetchLastAlertsByIMEI(imei, 30);
       setAlerts(data);
     } catch (err) {
       console.error("Failed to fetch alerts", err);
