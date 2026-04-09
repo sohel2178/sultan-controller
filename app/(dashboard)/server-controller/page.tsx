@@ -65,6 +65,22 @@ export default function ServerController() {
     }
   }, []);
 
+  const startStream = (type: string) => {
+    setLogs([]);
+    setRunning(true);
+
+    const eventSource = new EventSource(`/api/ssh-stream?type=${type}`);
+
+    eventSource.onmessage = (event) => {
+      setLogs((prev) => [...prev, event.data]);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      setRunning(false);
+    };
+  };
+
   const startRetailStream = () => {
     setLogs([]);
     setRunning(true);
@@ -140,32 +156,63 @@ export default function ServerController() {
             <CardTitle>Service Controls</CardTitle>
           </CardHeader>
 
-          <CardContent className="flex flex-wrap gap-3">
-            <Button
-              onClick={startRetailStream}
-              disabled={running}
-              className="rounded-xl"
-            >
-              🛒 Restart Retail Apps
-            </Button>
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={startRetailStream}
+                disabled={running}
+                className="rounded-xl"
+              >
+                🛒 Restart Retail Apps
+              </Button>
 
-            <Button
-              onClick={startRangsStream}
-              disabled={running}
-              variant="secondary"
-              className="rounded-xl"
-            >
-              🚚 Restart Rangs Apps
-            </Button>
+              <Button
+                onClick={startRangsStream}
+                disabled={running}
+                variant="secondary"
+                className="rounded-xl"
+              >
+                🚚 Restart Rangs Apps
+              </Button>
 
-            <Button
-              onClick={startApiStream}
-              disabled={running}
-              variant="outline"
-              className="rounded-xl"
-            >
-              🔌 Restart API Services
-            </Button>
+              <Button
+                onClick={startApiStream}
+                disabled={running}
+                variant="outline"
+                className="rounded-xl"
+              >
+                🔌 Restart API Services
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => startStream("retail")}
+                disabled={running}
+                className="rounded-xl"
+                variant="secondary"
+              >
+                🛒 Send Retail Files
+              </Button>
+
+              <Button
+                onClick={() => startStream("rangs")}
+                disabled={running}
+                variant="secondary"
+                className="rounded-xl"
+              >
+                🚚 Send Rangs Files
+              </Button>
+
+              <Button
+                onClick={() => startStream("tiktiki")}
+                disabled={running}
+                variant="outline"
+                className="rounded-xl"
+              >
+                🔌 Send Tiktiki Files
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
