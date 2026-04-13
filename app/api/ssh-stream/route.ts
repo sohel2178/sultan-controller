@@ -18,6 +18,9 @@ export async function GET(req: NextRequest) {
   } else if (type === "rangs") {
     command =
       "/home/sohel/data-check-retail/workenv/bin/python -u sumon_rangs.py";
+  } else if (type === "rangs_30_days") {
+    command =
+      "/home/sohel/data-check-retail/workenv/bin/python -u sumon_rangs_30_days.py";
   }
 
   const stream = new ReadableStream({
