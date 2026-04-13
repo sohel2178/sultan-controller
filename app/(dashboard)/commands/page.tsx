@@ -24,6 +24,30 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+const sampleCommands = [
+  "APN#",
+  "PARAM#",
+  "STATUS#",
+  "SERVER#",
+  "URL#",
+  "CXZT",
+  "RELAY,1#",
+  "RELAY,0#",
+  "VERSION#",
+  "WHERE#",
+  "SENDS#",
+  "SENDS,30#",
+  "SENDS,60#",
+  "SENDS,0#",
+  "SZCS#SOURCE_OFF_TYPE=1",
+  "SZCS#SOURCE_OFF_TYPE=0",
+  "SZCS#GT06SEL=1",
+  "SZCS#GT06IEXVOL=2",
+  "MILEAGE=0#",
+  "IPLOCK,123456,020178#",
+  "IPLOCK,A,020178,01409962090#",
+];
+
 export default function AdminCommands() {
   const [imei, setImei] = useState("");
   const [commands, setCommands] = useState<Command[]>([]);
@@ -32,6 +56,25 @@ export default function AdminCommands() {
   const [newCommand, setNewCommand] = useState({
     command: "",
   });
+
+  const [filteredCommands, setFilteredCommands] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleInputChange = (value: string) => {
+    setNewCommand({ command: value });
+
+    if (!value) {
+      setFilteredCommands([]);
+      return;
+    }
+
+    const filtered = sampleCommands.filter((cmd) =>
+      cmd.toLowerCase().includes(value.toLowerCase()),
+    );
+
+    setFilteredCommands(filtered);
+    setShowDropdown(true);
+  };
 
   const handleCreateCommand = async () => {
     if (!isValidIMEI(imei)) {
@@ -92,7 +135,7 @@ export default function AdminCommands() {
 
     const interval = setInterval(() => {
       fetchCommands();
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [imei]);
@@ -132,14 +175,32 @@ export default function AdminCommands() {
                   <DialogTitle>Create New Command</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="space-y-4 relative">
                   <Input
-                    placeholder="Command (e.g. RELAY,123#)"
+                    placeholder="Command (e.g. RELAY,0#)"
                     value={newCommand.command}
-                    onChange={(e) =>
-                      setNewCommand({ ...newCommand, command: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onFocus={() => setShowDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                   />
+
+                  {/* 🔽 Dropdown */}
+                  {showDropdown && filteredCommands.length > 0 && (
+                    <div className="absolute w-full bg-white border rounded-md shadow-md max-h-40 overflow-y-auto z-50">
+                      {filteredCommands.map((cmd, index) => (
+                        <div
+                          key={index}
+                          className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm font-mono"
+                          onClick={() => {
+                            setNewCommand({ command: cmd });
+                            setShowDropdown(false);
+                          }}
+                        >
+                          {cmd}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <Button onClick={handleCreateCommand} className="w-full">
                     Create Command 🚀
