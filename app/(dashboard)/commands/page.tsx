@@ -47,6 +47,8 @@ const sampleCommands = [
   "IPLOCK,123456,020178#",
   "IPLOCK,A,020178,01409962090#",
   "SZCS#MAIN_IPLOCK=1",
+  "SZCS#GPS_DISSLP=1",
+  "SZCS#GPS_DISSLP=0",
 ];
 
 export default function AdminCommands() {
