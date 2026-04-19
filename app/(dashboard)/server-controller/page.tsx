@@ -23,9 +23,15 @@ export default function ServerController() {
   const [file, setFile] = useState<File | null>(null);
   const [amount, setAmount] = useState("");
   const [open, setOpen] = useState(false);
+  const [controllerOpen, setControllerOpen] = useState(false);
+  const [controllerNumber, setControllerNumber] = useState("");
 
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
+
+  const validateNumber = (num: string) => {
+    return /^\+8801\d{9}$/.test(num);
+  };
 
   const handleGenerate = async () => {
     if (!file || !amount) return;
@@ -154,6 +160,40 @@ export default function ServerController() {
     };
   };
 
+  const startControllerStream = () => {
+    setShowTable(false); // 👈 ADD THIS
+    setLogs([]);
+    setRunning(true);
+
+    const eventSource = new EventSource(
+      "/api/set-controller-number?number=" +
+        encodeURIComponent(controllerNumber),
+    );
+
+    eventSource.onmessage = (event) => {
+      setLogs((prev) => [...prev, event.data]);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      setRunning(false);
+    };
+  };
+
+  const handleSetControllerNumber = async () => {
+    if (!controllerNumber) return;
+
+    if (!validateNumber(controllerNumber)) {
+      alert("Invalid number! Use format: 8801XXXXXXXXX");
+      return;
+    }
+
+    setControllerOpen(false);
+    setControllerNumber("");
+
+    startControllerStream();
+  };
+
   if (!authorized) return null;
 
   return (
@@ -249,6 +289,36 @@ export default function ServerController() {
               >
                 🔌 Send Rangs 30 days Files
               </Button>
+
+              <Button
+                onClick={() => setControllerOpen(true)}
+                className="rounded-xl"
+                variant="outline"
+              >
+                Set Controller Number
+              </Button>
+              <Dialog open={controllerOpen} onOpenChange={setControllerOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Set Controller Number</DialogTitle>
+                    <DialogDescription>
+                      Enter the controller number to set with 880xxx format.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <input
+                      type="text" // ❌ number will break + sign
+                      placeholder="+8801XXXXXXXXX"
+                      value={controllerNumber}
+                      onChange={(e) => setControllerNumber(e.target.value)}
+                      className="w-full border p-2 rounded"
+                    />
+
+                    <Button onClick={handleSetControllerNumber}>Submit</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <Separator />
