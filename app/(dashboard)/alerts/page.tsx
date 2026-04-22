@@ -38,7 +38,7 @@ export default function AdminAlerts() {
 
     const interval = setInterval(() => {
       fetchAlerts();
-    }, 10000); // auto refresh like command page
+    }, 15000); // auto refresh like command page
 
     return () => clearInterval(interval);
   }, [imei]);

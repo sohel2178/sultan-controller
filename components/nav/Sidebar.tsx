@@ -6,7 +6,14 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { AlarmClock, Command, Wallet, LogOut, Server } from "lucide-react";
+import {
+  AlarmClock,
+  Command,
+  Wallet,
+  LogOut,
+  Server,
+  UtilityPole,
+} from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -28,6 +35,11 @@ export default function Sidebar() {
       label: "Retail Collections",
       icon: Wallet,
       href: "/retail-collections",
+    },
+    {
+      label: "Utilities",
+      icon: UtilityPole,
+      href: "/utilities",
     },
     ...(role === "superadmin"
       ? [

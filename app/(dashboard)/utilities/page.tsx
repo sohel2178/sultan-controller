@@ -24,6 +24,7 @@ export default function ServerController() {
   const [amount, setAmount] = useState("");
   const [open, setOpen] = useState(false);
   const [controllerOpen, setControllerOpen] = useState(false);
+  const [numberCheckDialogOpen, setNumberCheckDialogOpen] = useState(false);
   const [controllerNumber, setControllerNumber] = useState("");
 
   const router = useRouter();
@@ -60,6 +61,83 @@ export default function ServerController() {
     setShowTable(true);
 
     setOpen(false); // 👈 CLOSE DIALOG HERE
+  };
+
+  const handleProcessTextFile = async () => {
+    // console.log("First");
+    if (!file) return;
+
+    const text = await file.text();
+
+    const numbers = text
+      .split("\n")
+      .map((n) => n.trim())
+      .filter((n) => n);
+
+    const formattedNumbers = numbers.map((num) => {
+      // remove existing country code if exists
+      let clean = num.replace(/^(\+?88)/, "");
+
+      return "88" + clean;
+    });
+
+    setShowTable(false); // 👈 ADD THIS
+    setLogs([]);
+    setRunning(true);
+    setNumberCheckDialogOpen(false); // 👈 CLOSE DIALOG HERE
+
+    const res = await fetch("/api/check-numbers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        data: formattedNumbers,
+      }),
+    });
+
+    if (!res.body) {
+      throw new Error("Streaming not supported or empty response");
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // split into lines (not blocks)
+      const lines = buffer.split("\n");
+
+      // keep last incomplete line
+      buffer = lines.pop() || "";
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+
+        // remove SSE prefix if exists
+        if (line.startsWith("data:")) {
+          line = line.replace(/^data:\s*/, "");
+        }
+
+        // 👇 now ALL lines pass (even without "data:")
+        setLogs((prev) => [...prev, line]);
+      }
+    }
+
+    // const data = formattedNumbers.map((num) => ({
+    //   mobile: num,
+    //   amount: amount,
+    //   type: "Prepaid",
+    // }));
+
+    // setTableData(data);
   };
 
   const downloadCSV = () => {
@@ -183,7 +261,7 @@ export default function ServerController() {
     setRunning(true);
 
     const eventSource = new EventSource(
-      "/api/set-controller-number?number=" +
+      "/api/set-general-controller-number?number=" +
         encodeURIComponent(controllerNumber),
     );
 
@@ -233,78 +311,25 @@ export default function ServerController() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="rounded-2xl shadow-sm border">
-          <CardHeader>
-            <CardTitle>Service Controls</CardTitle>
+        <Card className="rounded-2xl border bg-white/60 backdrop-blur shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold">
+              ⚙️ Service Controls
+            </CardTitle>
           </CardHeader>
 
-          <CardContent className="flex flex-col gap-3">
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={startRetailStream}
-                disabled={running}
-                variant="secondary"
-                className="rounded-xl"
-              >
-                🛒 Restart Retail Apps
+          <CardContent className="space-y-4">
+            {/* ACTION BUTTONS */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button onClick={() => setOpen(true)} className="rounded-xl px-4">
+                📄 Generate Table
               </Button>
 
               <Button
-                onClick={startRangsStream}
-                disabled={running}
-                variant="secondary"
-                className="rounded-xl"
+                onClick={() => setNumberCheckDialogOpen(true)}
+                className="rounded-xl px-4"
               >
-                🚚 Restart Rangs Apps
-              </Button>
-
-              <Button
-                onClick={startApiStream}
-                disabled={running}
-                variant="outline"
-                className="rounded-xl"
-              >
-                🔌 Restart API Services
-              </Button>
-            </div>
-
-            <Separator />
-
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() => startStream("retail")}
-                disabled={running}
-                className="rounded-xl"
-                variant="secondary"
-              >
-                🛒 Send Retail Files
-              </Button>
-
-              <Button
-                onClick={() => startStream("rangs")}
-                disabled={running}
-                variant="secondary"
-                className="rounded-xl"
-              >
-                🚚 Send Rangs Files
-              </Button>
-
-              <Button
-                onClick={() => startStream("tiktiki")}
-                disabled={running}
-                variant="outline"
-                className="rounded-xl"
-              >
-                🔌 Send Tiktiki Files
-              </Button>
-
-              <Button
-                onClick={() => startStream("rangs_30_days")}
-                disabled={running}
-                variant="outline"
-                className="rounded-xl"
-              >
-                🔌 Send Rangs 30 days Files
+                🔌 Check Numbers
               </Button>
 
               <Button
@@ -314,84 +339,112 @@ export default function ServerController() {
               >
                 Set Controller Number
               </Button>
-              <Dialog open={controllerOpen} onOpenChange={setControllerOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Set Controller Number</DialogTitle>
-                    <DialogDescription>
-                      Enter the controller number to set with 880xxx format.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="space-y-4">
-                    <input
-                      type="text" // ❌ number will break + sign
-                      placeholder="+8801XXXXXXXXX"
-                      value={controllerNumber}
-                      onChange={(e) => setControllerNumber(e.target.value)}
-                      className="w-full border p-2 rounded"
-                    />
-
-                    <Button onClick={handleSetControllerNumber}>Submit</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
 
-            <Separator />
+            {/* DIALOG */}
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="rounded-2xl max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-lg">Generate Table</DialogTitle>
+                  <DialogDescription>
+                    Upload a text file and assign an amount.
+                  </DialogDescription>
+                </DialogHeader>
 
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={() => setOpen(true)} className="rounded-xl">
-                Generate Table from Text Files
-              </Button>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Generate Table</DialogTitle>
-                    <DialogDescription>
-                      Upload a text file with mobile numbers and set amount.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="space-y-4">
+                <div className="space-y-4 pt-2">
+                  {/* FILE INPUT */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">Text File</label>
                     <input
                       type="file"
                       accept=".txt"
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
-                      className="w-full"
+                      className="w-full border rounded-lg p-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
                     />
+                  </div>
 
+                  {/* AMOUNT INPUT */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">Amount</label>
                     <input
                       type="number"
                       placeholder="Enter amount"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full border p-2 rounded"
+                      className="w-full border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-
-                    <Button onClick={handleGenerate}>Generate</Button>
                   </div>
-                </DialogContent>
-              </Dialog>
 
-              <Button
-                onClick={() => startBulkUnassignStream("retail")}
-                disabled={running}
-                variant="outline"
-                className="rounded-xl"
-              >
-                🔌 Bulk UnAssign Retail
-              </Button>
+                  {/* ACTION */}
+                  <Button
+                    onClick={handleGenerate}
+                    className="w-full rounded-xl"
+                  >
+                    🚀 Generate Table
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
-              <Button
-                onClick={() => startBulkUnassignStream("tiktiki")}
-                disabled={running}
-                variant="outline"
-                className="rounded-xl"
-              >
-                🔌 Bulk UnAssign Tiktiki
-              </Button>
-            </div>
+            <Dialog
+              open={numberCheckDialogOpen}
+              onOpenChange={setNumberCheckDialogOpen}
+            >
+              <DialogContent className="rounded-2xl max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-lg">
+                    Mobile Number Status Check
+                  </DialogTitle>
+                  <DialogDescription>
+                    Upload a text file to check the status of these number.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 pt-2">
+                  {/* FILE INPUT */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">Text File</label>
+                    <input
+                      type="file"
+                      accept=".txt"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                      className="w-full border rounded-lg p-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
+                    />
+                  </div>
+
+                  {/* ACTION */}
+                  <Button
+                    onClick={handleProcessTextFile}
+                    className="w-full rounded-xl"
+                  >
+                    🚀 Send to Check Numbers
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={controllerOpen} onOpenChange={setControllerOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Set Controller Number</DialogTitle>
+                  <DialogDescription>
+                    Enter the controller number to set with 880xxx format.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <input
+                    type="text" // ❌ number will break + sign
+                    placeholder="+8801XXXXXXXXX"
+                    value={controllerNumber}
+                    onChange={(e) => setControllerNumber(e.target.value)}
+                    className="w-full border p-2 rounded"
+                  />
+
+                  <Button onClick={handleSetControllerNumber}>Submit</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </motion.div>
