@@ -3,15 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
 
@@ -26,9 +23,6 @@ export default function ServerController() {
   const [controllerOpen, setControllerOpen] = useState(false);
   const [numberCheckDialogOpen, setNumberCheckDialogOpen] = useState(false);
   const [controllerNumber, setControllerNumber] = useState("");
-
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
 
   const validateNumber = (num: string) => {
     return /^\+8801\d{9}$/.test(num);
@@ -160,101 +154,6 @@ export default function ServerController() {
     URL.revokeObjectURL(url);
   };
 
-  useEffect(() => {
-    const role = localStorage.getItem("role");
-
-    if (role !== "superadmin") {
-      router.push("/alerts"); // redirect if not allowed
-    } else {
-      setAuthorized(true);
-    }
-  }, []);
-
-  const startStream = (type: string) => {
-    setShowTable(false); // 👈 ADD THIS
-    setLogs([]);
-    setRunning(true);
-
-    const eventSource = new EventSource(`/api/ssh-stream?type=${type}`);
-
-    eventSource.onmessage = (event) => {
-      setLogs((prev) => [...prev, event.data]);
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-      setRunning(false);
-    };
-  };
-
-  const startRetailStream = () => {
-    setShowTable(false); // 👈 ADD THIS
-    setLogs([]);
-    setRunning(true);
-
-    const eventSource = new EventSource("/api/ssh-retail-stream");
-
-    eventSource.onmessage = (event) => {
-      setLogs((prev) => [...prev, event.data]);
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-      setRunning(false);
-    };
-  };
-
-  const startRangsStream = () => {
-    setShowTable(false); // 👈 ADD THIS
-    setLogs([]);
-    setRunning(true);
-
-    const eventSource = new EventSource("/api/ssh-rangs-stream");
-
-    eventSource.onmessage = (event) => {
-      setLogs((prev) => [...prev, event.data]);
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-      setRunning(false);
-    };
-  };
-
-  const startApiStream = () => {
-    setShowTable(false); // 👈 ADD THIS
-    setLogs([]);
-    setRunning(true);
-
-    const eventSource = new EventSource("/api/ssh-api-stream");
-
-    eventSource.onmessage = (event) => {
-      setLogs((prev) => [...prev, event.data]);
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-      setRunning(false);
-    };
-  };
-
-  const startBulkUnassignStream = (type: string) => {
-    setShowTable(false); // 👈 ADD THIS
-    setLogs([]);
-    setRunning(true);
-
-    const eventSource = new EventSource(`/api/bulk-unassign?type=${type}`);
-
-    eventSource.onmessage = (event) => {
-      setLogs((prev) => [...prev, event.data]);
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
-      setRunning(false);
-    };
-  };
-
   const startControllerStream = () => {
     setShowTable(false); // 👈 ADD THIS
     setLogs([]);
@@ -289,7 +188,7 @@ export default function ServerController() {
     startControllerStream();
   };
 
-  if (!authorized) return null;
+  //   if (!authorized) return null;
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
@@ -299,10 +198,10 @@ export default function ServerController() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-3xl font-bold tracking-tight">
-          🖥️ Server Controller
+          🖥️ Utility Controller
         </h1>
         <p className="text-muted-foreground mt-1">
-          Manage your production services like a boss 😎
+          Manage your production services like a boss 😎 with permissions
         </p>
       </motion.div>
 
