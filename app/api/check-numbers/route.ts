@@ -14,7 +14,6 @@ export async function POST(req: Request) {
     return new Response("Too many items", { status: 400 });
   }
 
-  // ✅ Encode
   const json = JSON.stringify(body.data);
   const base64 = Buffer.from(json).toString("base64");
 
@@ -22,10 +21,40 @@ export async function POST(req: Request) {
     start(controller) {
       const conn = new Client();
 
-      // 🔥 SAME send pattern as GET
-      const send = (msg: string) => {
-        controller.enqueue(`data: ${msg}\n\n`);
+      let isClosed = false;
+      let activeStream: any = null;
+
+      const safeClose = () => {
+        if (isClosed) return;
+        isClosed = true;
+
+        try {
+          activeStream?.close?.();
+        } catch {}
+
+        try {
+          conn.end();
+        } catch {}
+
+        try {
+          controller.close();
+        } catch {}
       };
+
+      const send = (msg: string) => {
+        if (isClosed) return;
+        try {
+          controller.enqueue(`data: ${msg}\n\n`);
+        } catch {
+          safeClose();
+        }
+      };
+
+      // ⏱️ HARD TIMEOUT (e.g. 2 min)
+      const timeout = setTimeout(() => {
+        send("⏰ Timeout reached. Killing process...");
+        safeClose();
+      }, 120000);
 
       conn
         .on("ready", () => {
@@ -43,10 +72,11 @@ export async function POST(req: Request) {
           conn.exec(command, (err, stream) => {
             if (err) {
               send(`❌ Exec Error: ${err.message}`);
-              controller.close();
-              conn.end();
-              return;
+              clearTimeout(timeout);
+              return safeClose();
             }
+
+            activeStream = stream;
 
             // 📡 STDOUT
             stream.on("data", (data: Buffer) => {
@@ -58,7 +88,7 @@ export async function POST(req: Request) {
               send("⚠️ " + data.toString());
             });
 
-            stream.on("close", (code: number) => {
+            const finish = (code?: number) => {
               send(`🏁 Process finished with code ${code}`);
 
               if (code === 0) {
@@ -67,26 +97,53 @@ export async function POST(req: Request) {
                 send("💀 Something went wrong, check logs above");
               }
 
-              controller.close();
-              conn.end();
-            });
+              clearTimeout(timeout);
+              safeClose();
+            };
+
+            stream.on("close", finish);
+            stream.on("exit", finish);
           });
         })
+
+        // ❌ SSH Error
         .on("error", (err) => {
           send(`❌ SSH Error: ${err.message}`);
-          controller.close();
+          clearTimeout(timeout);
+          safeClose();
         })
+
+        // 💀 SSH disconnected unexpectedly
+        .on("close", () => {
+          send("💀 SSH connection closed unexpectedly");
+          clearTimeout(timeout);
+          safeClose();
+        })
+
+        .on("end", () => {
+          send("⚠️ SSH connection ended");
+          clearTimeout(timeout);
+          safeClose();
+        })
+
         .connect({
           host: process.env.SSH_OPENCHAT_HOST!,
           username: process.env.SSH_USER!,
           privateKey: process.env.SSH_KEY!,
         });
     },
+
+    cancel() {
+      // 🔥 Client disconnected (browser closed tab etc.)
+      try {
+        // nothing fancy, connection will be cleaned via safeClose
+      } catch {}
+    },
   });
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream", // 🔥 SAME as GET
+      "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
     },

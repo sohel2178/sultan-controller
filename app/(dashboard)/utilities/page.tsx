@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { io } from "socket.io-client";
 
 export default function ServerController() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -57,8 +58,84 @@ export default function ServerController() {
     setOpen(false); // 👈 CLOSE DIALOG HERE
   };
 
+  // const handleProcessTextFile = async () => {
+  //   // console.log("First");
+  //   if (!file) return;
+
+  //   const text = await file.text();
+
+  //   const numbers = text
+  //     .split("\n")
+  //     .map((n) => n.trim())
+  //     .filter((n) => n);
+
+  //   const formattedNumbers = numbers.map((num) => {
+  //     // remove existing country code if exists
+  //     let clean = num.replace(/^(\+?88)/, "");
+
+  //     return "88" + clean;
+  //   });
+
+  //   setShowTable(false); // 👈 ADD THIS
+  //   setLogs([]);
+  //   setRunning(true);
+  //   setNumberCheckDialogOpen(false); // 👈 CLOSE DIALOG HERE
+
+  //   const res = await fetch("/api/check-numbers", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       data: formattedNumbers,
+  //     }),
+  //   });
+
+  //   if (!res.body) {
+  //     throw new Error("Streaming not supported or empty response");
+  //   }
+
+  //   const reader = res.body.getReader();
+  //   const decoder = new TextDecoder();
+
+  //   let buffer = "";
+
+  //   while (true) {
+  //     const { done, value } = await reader.read();
+  //     if (done) break;
+
+  //     buffer += decoder.decode(value, { stream: true });
+
+  //     // split into lines (not blocks)
+  //     const lines = buffer.split("\n");
+
+  //     // keep last incomplete line
+  //     buffer = lines.pop() || "";
+
+  //     for (let line of lines) {
+  //       line = line.trim();
+  //       if (!line) continue;
+
+  //       // remove SSE prefix if exists
+  //       if (line.startsWith("data:")) {
+  //         line = line.replace(/^data:\s*/, "");
+  //       }
+
+  //       // 👇 now ALL lines pass (even without "data:")
+  //       setLogs((prev) => [...prev, line]);
+  //     }
+  //   }
+
+  //   // const data = formattedNumbers.map((num) => ({
+  //   //   mobile: num,
+  //   //   amount: amount,
+  //   //   type: "Prepaid",
+  //   // }));
+
+  //   // setTableData(data);
+  // };
+
   const handleProcessTextFile = async () => {
-    // console.log("First");
     if (!file) return;
 
     const text = await file.text();
@@ -69,69 +146,43 @@ export default function ServerController() {
       .filter((n) => n);
 
     const formattedNumbers = numbers.map((num) => {
-      // remove existing country code if exists
       let clean = num.replace(/^(\+?88)/, "");
-
-      return "88" + clean;
+      return clean;
     });
 
-    setShowTable(false); // 👈 ADD THIS
     setLogs([]);
     setRunning(true);
-    setNumberCheckDialogOpen(false); // 👈 CLOSE DIALOG HERE
+    setShowTable(false);
+    setNumberCheckDialogOpen(false);
 
-    const res = await fetch("/api/check-numbers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    // 🔥 1. Start Job
+    const res = await fetch(
+      "https://tenant.sultantracker.com/api/worker/start",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: formattedNumbers }),
       },
-      body: JSON.stringify({
-        data: formattedNumbers,
-      }),
+    );
+
+    const { jobId } = await res.json();
+
+    // 🔥 2. Connect Socket
+    const socket = io("https://tenant.sultantracker.com");
+
+    socket.on("connect", () => {
+      socket.emit("join-job", jobId);
     });
 
-    if (!res.body) {
-      throw new Error("Streaming not supported or empty response");
-    }
+    socket.on("log", (msg: string) => {
+      setLogs((prev) => [...prev, msg]);
+    });
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-
-      // split into lines (not blocks)
-      const lines = buffer.split("\n");
-
-      // keep last incomplete line
-      buffer = lines.pop() || "";
-
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
-
-        // remove SSE prefix if exists
-        if (line.startsWith("data:")) {
-          line = line.replace(/^data:\s*/, "");
-        }
-
-        // 👇 now ALL lines pass (even without "data:")
-        setLogs((prev) => [...prev, line]);
-      }
-    }
-
-    // const data = formattedNumbers.map((num) => ({
-    //   mobile: num,
-    //   amount: amount,
-    //   type: "Prepaid",
-    // }));
-
-    // setTableData(data);
+    socket.on("disconnect", () => {
+      setRunning(false);
+    });
   };
 
   const downloadCSV = () => {
