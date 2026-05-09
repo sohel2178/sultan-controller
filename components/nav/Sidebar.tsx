@@ -41,6 +41,11 @@ export default function Sidebar() {
       icon: UtilityPole,
       href: "/utilities",
     },
+    {
+      label: "Campaigns",
+      icon: UtilityPole,
+      href: "/campaigns",
+    },
     ...(role === "superadmin"
       ? [
           {

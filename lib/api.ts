@@ -104,3 +104,26 @@ export const PaymentAPI = {
     await api.delete(`/retail_collections/${id}`);
   },
 };
+
+export const CampaignApi = {
+  startCampaign: async (
+    data: {
+      mobile_number: string;
+      number_of_vehicle: number;
+      amount: number;
+    }[],
+  ) => {
+    const res = await api.post("/campaigns", data);
+    return res.data;
+  },
+
+  getCampaigns: async () => {
+    const res = await api.get("/campaigns");
+    return res.data;
+  },
+
+  resetCampaign: async () => {
+    const res = await api.post("/campaigns/reset");
+    return res.data;
+  },
+};
