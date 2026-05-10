@@ -54,6 +54,14 @@ const sampleCommands = [
   "SZCS#MAIN_IPLOCK=1",
   "SZCS#GPS_DISSLP=1",
   "SZCS#GPS_DISSLP=0",
+  "EXBATCUT,ON,0,122,124,10#",
+  "EXBATCUT,OFF#",
+  "EXBATCUT#",
+  "EXBATALM,ON,0,122,124,10#",
+  "EXBATALM#",
+  "PASSWORD,666666,020178#",
+  "PWDSW,ON#",
+  "ADT#",
 ];
 
 export default function AdminCommands() {
