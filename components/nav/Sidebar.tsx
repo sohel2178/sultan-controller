@@ -13,11 +13,14 @@ import {
   LogOut,
   Server,
   UtilityPole,
+  Megaphone,
+  TriangleAlert,
 } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   const [role, setRole] = useState<string | null>(null);
 
@@ -25,28 +28,48 @@ export default function Sidebar() {
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     setRole(storedRole);
+    setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   // ✅ Sidebar items dynamically generated
   const sidebarItems = [
     { label: "Alerts", icon: AlarmClock, href: "/alerts" },
+
     { label: "Commands", icon: Command, href: "/commands" },
+
     {
       label: "Retail Collections",
       icon: Wallet,
       href: "/retail-collections",
     },
+
     {
       label: "Utilities",
       icon: UtilityPole,
       href: "/utilities",
     },
+
     {
-      label: "Campaigns",
-      icon: UtilityPole,
-      href: "/campaigns",
+      label: "Support Problems",
+      icon: TriangleAlert,
+      href: "/support-problem",
     },
-    ...(role === "superadmin"
+
+    ...(mounted && role === "superadmin"
+      ? [
+          {
+            label: "Campaigns",
+            icon: Megaphone,
+            href: "/campaigns",
+          },
+        ]
+      : []),
+
+    ...(mounted && role === "superadmin"
       ? [
           {
             label: "Server Controller",
@@ -76,8 +99,9 @@ export default function Sidebar() {
         <div className="p-3 space-y-2">
           {sidebarItems.map((item) => {
             const isActive =
-              pathname === item.href ||
-              (pathname === "/" && item.href === "/alerts");
+              mounted &&
+              (pathname === item.href ||
+                (pathname === "/" && item.href === "/alerts"));
 
             return (
               <motion.div

@@ -127,3 +127,26 @@ export const CampaignApi = {
     return res.data;
   },
 };
+
+export const SupportProblemAPI = {
+  createSupportProblem: async (data: {
+    device_id: string;
+    sim_number: string;
+    registration_number: string;
+    platform: string;
+    description: string;
+  }) => {
+    const res = await api.post("/support-problem", data);
+    return res.data;
+  },
+
+  getSupportProblems: async () => {
+    const res = await api.get("/support-problem");
+    return res.data;
+  },
+
+  getSupportProblemById: async (id: string) => {
+    const res = await api.get(`/support-problem/${id}`);
+    return res.data;
+  },
+};
