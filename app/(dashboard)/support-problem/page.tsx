@@ -94,6 +94,8 @@ export default function SupportProblemPage() {
     try {
       const res = await SupportProblemAPI.getSupportProblemById(device_id);
 
+      //   console.log("Details for device", device_id, res);
+
       setDetails(res.data || []);
 
       setDetailOpen(true);

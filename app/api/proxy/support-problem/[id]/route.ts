@@ -8,7 +8,7 @@ export async function GET(
 
   const res = await fetch(`${process.env.SUPPORT_PROBLEM_URL}/${id}`, {
     headers: {
-      Authorization: `Bearer ${process.env.AUTH_TOKEN}`,
+      Authorization: `Bearer ${process.env.CAMPAINS_TOKEN}`,
     },
   });
 
