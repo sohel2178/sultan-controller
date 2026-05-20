@@ -149,4 +149,24 @@ export const SupportProblemAPI = {
     const res = await api.get(`/support-problem/${id}`);
     return res.data;
   },
+  updateSupportProblem: async (
+    id: string,
+    data: {
+      device_id?: string;
+      description?: string;
+      platform?: string;
+      sim_number?: string;
+      registration_number?: string;
+    },
+  ) => {
+    const res = await api.put(`/support-problem/${id}`, data);
+
+    return res.data;
+  },
+
+  deleteSupportProblem: async (id: string) => {
+    const res = await api.delete(`/support-problem/${id}`);
+
+    return res.data;
+  },
 };

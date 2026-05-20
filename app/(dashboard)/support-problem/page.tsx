@@ -17,11 +17,15 @@ import { useEffect, useState } from "react";
 import { SupportProblemAPI } from "@/lib/api";
 
 export default function SupportProblemPage() {
+  const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [report, setReport] = useState<any[]>([]);
 
   const [search, setSearch] = useState("");
 
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  const [editData, setEditData] = useState<any>(null);
 
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -43,7 +47,7 @@ export default function SupportProblemPage() {
 
     const interval = setInterval(() => {
       fetchReport();
-    }, 30000);
+    }, 120000);
 
     return () => clearInterval(interval);
   }, []);
@@ -56,6 +60,28 @@ export default function SupportProblemPage() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = confirm("Delete this complaint?");
+
+    if (!ok) return;
+
+    try {
+      await SupportProblemAPI.deleteSupportProblem(id);
+
+      setDetails((prev) => prev.filter((x) => x._id !== id));
+
+      fetchReport();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEdit = (row: any) => {
+    setEditData(row);
+
+    setEditOpen(true);
   };
 
   // CREATE ENTRY
@@ -97,6 +123,7 @@ export default function SupportProblemPage() {
       //   console.log("Details for device", device_id, res);
 
       setDetails(res.data || []);
+      setSelectedDeviceId(device_id);
 
       setDetailOpen(true);
     } catch (error) {
@@ -116,7 +143,7 @@ export default function SupportProblemPage() {
   });
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto h-full overflow-hidden flex flex-col">
       {/* HEADER */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -154,7 +181,7 @@ export default function SupportProblemPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="rounded-2xl border shadow-sm">
+        <Card className="rounded-2xl border shadow-sm flex-1 overflow-hidden">
           <CardHeader>
             <CardTitle className="flex flex-col gap-3">
               📊 Last 30 Days Complaint Report
@@ -170,7 +197,7 @@ export default function SupportProblemPage() {
           <CardContent>
             <div
               className="overflow-auto rounded-xl border"
-              style={{ maxHeight: "600px" }}
+              style={{ maxHeight: "500px" }}
             >
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted z-10">
@@ -333,9 +360,12 @@ export default function SupportProblemPage() {
 
       {/* DETAIL DIALOG */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="rounded-2xl max-w-4xl">
+        <DialogContent className="rounded-2xl min-w-275 max-w-[95vw]">
           <DialogHeader>
-            <DialogTitle>Complaint History</DialogTitle>
+            <DialogTitle>
+              Complaint History of{" "}
+              <span className="text-red-500">{selectedDeviceId}</span>
+            </DialogTitle>
           </DialogHeader>
 
           <div
@@ -350,6 +380,8 @@ export default function SupportProblemPage() {
                   <th className="p-2 border">Description</th>
 
                   <th className="p-2 border">Platform</th>
+
+                  <th className="p-2 border">Actions</th>
                 </tr>
               </thead>
 
@@ -363,11 +395,145 @@ export default function SupportProblemPage() {
                     <td className="p-2 border">{row.description}</td>
 
                     <td className="p-2 border capitalize">{row.platform}</td>
+
+                    <td className="p-2 border">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(row)}
+                        >
+                          Edit
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(row._id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Complaint</DialogTitle>
+          </DialogHeader>
+
+          {editData && (
+            <div className="space-y-4">
+              {/* DEVICE ID */}
+              <input
+                value={editData.device_id || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    device_id: e.target.value,
+                  })
+                }
+                placeholder="Device ID"
+                className="w-full border rounded-lg p-2"
+              />
+
+              {/* SIM NUMBER */}
+              <input
+                value={editData.sim_number || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    sim_number: e.target.value,
+                  })
+                }
+                placeholder="SIM Number"
+                className="w-full border rounded-lg p-2"
+              />
+
+              {/* REGISTRATION */}
+              <input
+                value={editData.registration_number || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    registration_number: e.target.value,
+                  })
+                }
+                placeholder="Registration Number"
+                className="w-full border rounded-lg p-2"
+              />
+
+              {/* DESCRIPTION */}
+              <textarea
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    description: e.target.value,
+                  })
+                }
+                className="w-full border rounded-lg p-2 min-h-32"
+                placeholder="Problem Description"
+              />
+
+              {/* PLATFORM */}
+              <select
+                value={editData.platform || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    platform: e.target.value,
+                  })
+                }
+                className="w-full border rounded-lg p-2"
+              >
+                <option value="rangs">Rangs</option>
+
+                <option value="retail">Retail</option>
+
+                <option value="tiktiki">Tiktiki</option>
+              </select>
+
+              {/* SAVE BUTTON */}
+              <Button
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    await SupportProblemAPI.updateSupportProblem(editData._id, {
+                      device_id: editData.device_id,
+
+                      sim_number: editData.sim_number,
+
+                      registration_number: editData.registration_number,
+
+                      description: editData.description,
+
+                      platform: editData.platform,
+                    });
+
+                    setDetails((prev) =>
+                      prev.map((x) => (x._id === editData._id ? editData : x)),
+                    );
+
+                    fetchReport();
+
+                    setEditOpen(false);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
+              >
+                Save Changes
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
