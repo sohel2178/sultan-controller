@@ -36,6 +36,20 @@ export const AlertAPI = {
   },
 };
 
+export const RangsAlertAPI = {
+  fetchLastAlertsByIMEI: async (imei: string, limit = 50) => {
+    const res = await api.get(`/rangs-alerts`, {
+      params: { imei, limit },
+    });
+    return res.data;
+  },
+
+  remove: async (id: string): Promise<void> => {
+    console.log("Deleting alert with ID:", id); // Debug log
+    await api.delete(`/rangs-alerts/${id}`);
+  },
+};
+
 export const CommandAPI = {
   saveCommand: async (data: Omit<Command, "_id">): Promise<Command> => {
     const res = await api.post("/commands", data);
@@ -67,6 +81,41 @@ export const CommandAPI = {
 
   fetchCommandsByIMEI: async (imei: string): Promise<Command[]> => {
     const res = await api.get(`/commands/${imei}`);
+    return res.data;
+  },
+};
+
+export const RangsCommandAPI = {
+  saveCommand: async (data: Omit<Command, "_id">): Promise<Command> => {
+    const res = await api.post("/rangs-commands", data);
+    return res.data;
+  },
+
+  generateBasicCommands: async (imei: string) => {
+    const res = await api.post("/rangs-commands/generate-basic-command", {
+      device_id: imei,
+    });
+
+    return res.data;
+  },
+
+  createCommand: async ({
+    device_id,
+    power,
+  }: {
+    device_id: string;
+    power: string;
+  }) => {
+    const res = await api.post("/rangs-commands/create-single-command", {
+      device_id: device_id,
+      power: power,
+    });
+
+    return res.data;
+  },
+
+  fetchCommandsByIMEI: async (imei: string): Promise<Command[]> => {
+    const res = await api.get(`/rangs-commands/${imei}`);
     return res.data;
   },
 };

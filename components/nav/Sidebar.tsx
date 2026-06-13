@@ -78,6 +78,9 @@ export default function Sidebar() {
           },
         ]
       : []),
+
+    { label: "Rangs Alerts", icon: AlarmClock, href: "/rangs-alerts" },
+    { label: "Rangs Commands", icon: Command, href: "/rangs-commands" },
   ];
 
   const logout = () => {
