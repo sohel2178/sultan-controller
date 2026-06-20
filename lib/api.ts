@@ -118,6 +118,12 @@ export const RangsCommandAPI = {
     const res = await api.get(`/rangs-commands/${imei}`);
     return res.data;
   },
+
+  changeDevicePassword: async (data: { imei: string; password: string }) => {
+    const res = await api.post("/devices/change-device-password", data);
+
+    return res.data;
+  },
 };
 
 export const PaymentAPI = {

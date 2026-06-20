@@ -81,6 +81,11 @@ export default function Sidebar() {
 
     { label: "Rangs Alerts", icon: AlarmClock, href: "/rangs-alerts" },
     { label: "Rangs Commands", icon: Command, href: "/rangs-commands" },
+    {
+      label: "Rangs Password Change",
+      icon: Command,
+      href: "/rangs-password-change",
+    },
   ];
 
   const logout = () => {
