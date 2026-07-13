@@ -15,6 +15,7 @@ import {
   UtilityPole,
   Megaphone,
   TriangleAlert,
+  Wrench,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -40,6 +41,11 @@ export default function Sidebar() {
     { label: "Alerts", icon: AlarmClock, href: "/alerts" },
 
     { label: "Commands", icon: Command, href: "/commands" },
+    {
+      label: "Retail Troubleshoot",
+      icon: Wrench,
+      href: "/retail-troubleshoot",
+    },
 
     {
       label: "Retail Collections",

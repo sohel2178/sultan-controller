@@ -1,4 +1,5 @@
 import { Command } from "@/types/command";
+import { Device } from "@/types/device";
 import { Payment } from "@/types/payment";
 import { MonthlyPaymentRequest } from "@/types/report";
 import axios from "axios";
@@ -21,6 +22,13 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+export const DeviceAPI = {
+  getCurrentDevice: async (id: string): Promise<Device> => {
+    const res = await api.get(`/devices/${id}`);
+    return res.data;
+  },
+};
 
 export const AlertAPI = {
   fetchLastAlertsByIMEI: async (imei: string, limit = 50) => {
