@@ -86,7 +86,7 @@ export default function StatusCard({
         className,
       )}
     >
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-2">
         <div className="flex items-center gap-3">
           <div
             className={cn(
@@ -108,7 +108,7 @@ export default function StatusCard({
         </Badge>
       </CardHeader>
 
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-3 pb-3 pt-0">{children}</CardContent>
     </Card>
   );
 }
