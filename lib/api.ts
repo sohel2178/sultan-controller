@@ -2,6 +2,7 @@ import { Command } from "@/types/command";
 import { Device } from "@/types/device";
 import { Payment } from "@/types/payment";
 import { MonthlyPaymentRequest } from "@/types/report";
+import { User } from "@/types/user";
 import axios from "axios";
 
 // const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5555";
@@ -23,10 +24,105 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export const UserAPI = {
+  list: async (): Promise<User[]> => {
+    const res = await api.get("/users");
+    return res.data.map((u: any) => ({
+      id: u._id, // 👈 map _id → id
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      contact: u.contact,
+      organization_name: u.organization_name,
+      address: u.address,
+      image: u.image,
+      token: u.token,
+      managerId: u.managerId,
+    }));
+  },
+
+  adminUsers: async (
+    page: number = 1,
+    limit: number = 10,
+    search: string = "",
+  ) => {
+    const res = await api.get("/users/admin", {
+      params: {
+        page,
+        limit,
+        search,
+      },
+    });
+
+    return {
+      data: res.data.data.map((u: any) => ({
+        id: u._id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        contact: u.contact,
+        organization_name: u.organization_name,
+        address: u.address,
+        image: u.image,
+        token: u.token,
+        managerId: u.managerId,
+      })),
+      pagination: res.data.pagination,
+    };
+  },
+
+  create: async (data: Partial<User> & { password: string }): Promise<User> => {
+    const res = await api.post("/users/create", data);
+    const u = res.data.user;
+    return { ...u, id: u._id }; // 👈 normalize
+  },
+
+  update: async (id: string, data: Partial<User>): Promise<User> => {
+    const res = await api.put(`/users/${id}`, data);
+    const u = res.data.user;
+    return { ...u, id: u._id }; // 👈 normalize
+  },
+
+  remove: async (id: string): Promise<void> => {
+    await api.delete(`/users/${id}`);
+  },
+
+  search: async (query: string): Promise<User[]> => {
+    const res = await api.get(
+      `/users/search?search=${encodeURIComponent(query)}`,
+    );
+    return res.data.map((u: any) => ({
+      id: u._id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      contact: u.contact,
+      organization_name: u.organization_name,
+      address: u.address,
+      image: u.image,
+      token: u.token,
+      managerId: u.managerId,
+    }));
+  },
+
+  registerFCMToken: async (token: string): Promise<void> => {
+    await api.post("/users/update-token", { token });
+  },
+};
+
 export const DeviceAPI = {
   getCurrentDevice: async (id: string): Promise<Device> => {
     const res = await api.get(`/devices/${id}`);
     return res.data;
+  },
+  assign: async (id: string, uid: string): Promise<Device> => {
+    const res = await api.put(`/devices/${id}/assign`, { uid });
+    return { ...res.data.device, id: res.data.device.id };
+  },
+
+  unassign: async (id: string): Promise<Device> => {
+    const res = await api.put(`/devices/${id}/unassign`);
+    return { ...res.data.device, id: res.data.device.id };
   },
 };
 

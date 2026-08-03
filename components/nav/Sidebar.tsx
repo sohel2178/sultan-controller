@@ -41,6 +41,7 @@ export default function Sidebar() {
     { label: "Alerts", icon: AlarmClock, href: "/alerts" },
 
     { label: "Commands", icon: Command, href: "/commands" },
+    { label: "Voucher", icon: Command, href: "/voucher" },
     {
       label: "Retail Troubleshoot",
       icon: Wrench,
