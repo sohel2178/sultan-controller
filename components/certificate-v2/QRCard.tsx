@@ -14,23 +14,23 @@ export default function QRCard({
 }: QRCardProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
-      <div className="bg-gray-900 px-4 py-3">
+      <div className="bg-gray-900 px-4 py-2.5">
         <h3 className="text-sm font-bold uppercase tracking-widest text-white">
-          Certificate Verification
+          Verification
         </h3>
       </div>
 
-      <div className="flex flex-col items-center p-4">
-        <div className="rounded-xl border bg-white p-4 shadow-sm">
+      <div className="flex flex-col items-center p-2">
+        <div className="rounded-xl border bg-white p-2 shadow-sm">
           <QRCode
             value={verificationUrl}
-            size={130}
+            size={90}
             bgColor="#ffffff"
             fgColor="#111827"
           />
         </div>
 
-        <div className="mt-5 flex items-center gap-2 text-orange-600">
+        <div className="mt-2 flex items-center gap-2 text-orange-600">
           <ShieldCheck size={18} />
           <span className="font-semibold">Scan to Verify</span>
         </div>
@@ -39,7 +39,7 @@ export default function QRCard({
           Scan this QR Code to verify the authenticity of this certificate.
         </p> */}
 
-        <div className="mt-5 w-full rounded-lg bg-gray-100 px-4 py-3 text-center">
+        <div className="mt-2 w-full rounded-lg bg-gray-100 px-4 py-2 text-center">
           <p className="text-xs uppercase tracking-wide text-gray-500">
             Certificate No.
           </p>

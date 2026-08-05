@@ -5,6 +5,66 @@ import { MonthlyPaymentRequest } from "@/types/report";
 import { User } from "@/types/user";
 import axios from "axios";
 
+import {
+  Certificate,
+  CertificateListResponse,
+  CertificateQuery,
+  CertificateResponse,
+  CreateCertificateDto,
+  UpdateCertificateDto,
+  VerifyCertificateResponse,
+} from "@/types/certificate-types";
+
+const mapCertificate = (c: any): Certificate => ({
+  _id: c._id,
+
+  certificateNo: c.certificate_no,
+  registrationNo: c.registration_no,
+
+  verificationUrl: `https://verify.sultantracker.com/c/${c._id}`,
+
+  company: {
+    companyName: c.company,
+    brandName: c.brand,
+    licenseNo: c.license_no ?? "",
+    hotline: c.hotline ?? "",
+    website: c.website ?? "",
+    email: c.email ?? "",
+  },
+
+  vehicle: {
+    ownerName: c.owner_name,
+    registrationNo: c.registration_no,
+    vehicleType: c.vehicle_type,
+    chassisNo: c.chassis_no,
+    engineNo: c.engine_no,
+    imei: c.imei,
+    iccid: c.iccid,
+    deviceModel: c.device_model,
+    installationDate: c.installation_date,
+    installer: c.installer,
+  },
+
+  validity: {
+    issueDate: c.issue_date,
+    validUntil: c.valid_until,
+    gpsStatus: c.gps_status,
+    deviceStatus: c.device_status,
+    lastCommunication: c.last_communication ?? "",
+  },
+
+  verificationCount: c.verification_count,
+  revoked: c.revoked,
+  revokedAt: c.revoked_at,
+
+  notes: c.notes,
+
+  createdBy: c.created_by,
+
+  createdAt: c.createdAt,
+  updatedAt: c.updatedAt,
+});
+
 // const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5555";
 
 // Create an axios instance
@@ -327,5 +387,118 @@ export const SupportProblemAPI = {
     const res = await api.delete(`/support-problem/${id}`);
 
     return res.data;
+  },
+};
+
+export const CertificateAPI = {
+  /**
+   * Certificate List
+   */
+  list: async (
+    query: CertificateQuery = {},
+  ): Promise<CertificateListResponse> => {
+    const res = await api.get("/certificate", {
+      params: query,
+    });
+
+    return {
+      success: res.data.success,
+      items: res.data.items.map(mapCertificate),
+      pagination: res.data.pagination,
+    };
+  },
+
+  /**
+   * Get Single Certificate
+   */
+  getById: async (id: string): Promise<Certificate> => {
+    const res = await api.get(`/certificate/${id}`);
+
+    return mapCertificate(res.data.data);
+  },
+
+  /**
+   * Create Certificate
+   */
+  create: async (data: CreateCertificateDto): Promise<Certificate> => {
+    const payload = {
+      owner_name: data.ownerName,
+      registration_no: data.registrationNo,
+      vehicle_type: data.vehicleType,
+
+      chassis_no: data.chassisNo,
+      engine_no: data.engineNo,
+
+      imei: data.imei,
+      iccid: data.iccid,
+
+      device_model: data.deviceModel,
+
+      installation_date: data.installationDate,
+      installer: data.installer,
+
+      issue_date: data.issueDate,
+      valid_until: data.validUntil,
+
+      gps_status: data.gpsStatus,
+      device_status: data.deviceStatus,
+
+      notes: data.notes,
+    };
+
+    const res = await api.post("/certificate", payload);
+
+    return mapCertificate(res.data.data);
+  },
+
+  /**
+   * Update Certificate
+   */
+  update: async (
+    id: string,
+    data: UpdateCertificateDto,
+  ): Promise<Certificate> => {
+    const res = await api.patch(`/certificate/${id}`, data);
+
+    return mapCertificate(res.data.data);
+  },
+
+  /**
+   * Delete Certificate
+   */
+  remove: async (id: string): Promise<void> => {
+    await api.delete(`/certificate/${id}`);
+  },
+
+  /**
+   * Revoke Certificate
+   */
+  revoke: async (id: string): Promise<Certificate> => {
+    const res = await api.patch(`/certificate/${id}/revoke`);
+
+    return mapCertificate(res.data.data);
+  },
+
+  /**
+   * Print Certificate
+   */
+  print: async (id: string): Promise<Certificate> => {
+    const res = await api.get(`/certificate/${id}/print`);
+
+    return mapCertificate(res.data.data);
+  },
+
+  /**
+   * Public Verification
+   */
+  verify: async (certificateNo: string): Promise<VerifyCertificateResponse> => {
+    const res = await api.get(`certificate/verify/${certificateNo}`);
+
+    return {
+      success: res.data.success,
+      verified: res.data.verified,
+      data: res.data.data ? mapCertificate(res.data.data) : undefined,
+      message: res.data.message,
+    };
   },
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatBangladeshDate } from "@/lib/date";
 import { Car, Hash, Cpu, Calendar, User, Wrench } from "lucide-react";
 
 interface VehicleCardProps {
@@ -60,15 +61,7 @@ export default function VehicleCard({
           value={chassisNo}
         />
 
-        <InfoItem
-          icon={<Hash size={16} />}
-          label="Engine No."
-          value={engineNo}
-        />
-
         <InfoItem icon={<Cpu size={16} />} label="Device IMEI" value={imei} />
-
-        <InfoItem icon={<Cpu size={16} />} label="SIM ICCID" value={iccid} />
 
         <InfoItem
           icon={<Cpu size={16} />}
@@ -79,7 +72,7 @@ export default function VehicleCard({
         <InfoItem
           icon={<Calendar size={16} />}
           label="Installation Date"
-          value={installationDate}
+          value={formatBangladeshDate(installationDate)}
         />
 
         <InfoItem
@@ -100,15 +93,17 @@ interface InfoItemProps {
 
 function InfoItem({ icon, label, value }: InfoItemProps) {
   return (
-    <div className="flex gap-3">
-      <div className="mt-1 text-orange-500">{icon}</div>
+    <div className="flex gap-2.5">
+      <div className="mt-0.5 shrink-0 text-orange-500">{icon}</div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
           {label}
         </p>
 
-        <p className="mt-1 break-all font-semibold text-gray-900">{value}</p>
+        <p className="mt-0.5 break-all text-[13px] font-semibold leading-5 text-gray-900">
+          {value || "-"}
+        </p>
       </div>
     </div>
   );

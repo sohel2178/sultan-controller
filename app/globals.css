@@ -117,6 +117,21 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* #certificate,
+#certificate * {
+  visibility: visible;
+}
+
+#certificate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0;
+  box-shadow: none !important;
+} */
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -1,16 +1,29 @@
 "use client";
 
-import Header from "./Header";
+import DecorativeBorder from "./DecorativeBorder";
 import Watermark from "./Watermark";
+
+import Header from "./Header";
+// import SummaryBar from "./SummaryBar";
+import DescriptionCard from "./DescriptionCard";
+
 import CompanyCard from "./CompanyCard";
 import QRCard from "./QRCard";
+// import VerificationCard from "./VerificationCard";
 import NoticeCard from "./NoticeCard";
 import VehicleCard from "./VehicleCard";
 import ValidityCard from "./ValidityCard";
-import Footer from "./Footer";
-import DescriptionCard from "./DescriptionCard";
+
+// import VehicleCard from "./VehicleCard";
+// import CertificateStatusCard from "./CertificateStatusCard";
+
 import ContactCard from "./ContactCard";
-import SignatureBox from "./SignatureBox";
+import DigitalCertificate from "./DigitalCertificate";
+import Footer from "./Footer";
+// import DigitalCertificate from "./DigitalCertificate";
+// import SignatureBox from "./SignatureBox";
+
+// import Footer from "./Footer";
 
 export interface CertificateProps {
   certificateNo: string;
@@ -58,31 +71,26 @@ export default function Certificate({
   return (
     <div
       id="certificate"
-      className="relative mx-auto h-[297mm] w-[210mm] overflow-hidden bg-white shadow-2xl print:shadow-none"
+      className="
+         relative
+         mx-auto
+         w-[210mm]
+        h-[297mm]
+        overflow-hidden
+        bg-white
+         shadow-2xl
+         print:shadow-none
+       "
     >
       <Watermark />
+      <div className="absolute inset-3 rounded-xl border-[3px] border-orange-500" />
+      <div className="absolute inset-4 rounded-xl border border-orange-500" />
 
-      {/* Outer Border */}
-      <div className="absolute inset-3 rounded-xl border-2 border-slate-300" />
-
-      {/* Inner Border */}
-      <div className="absolute inset-5 rounded-lg border border-slate-200" />
-
-      {/* Accent */}
-      <div className="absolute left-5 right-5 top-5 h-1 rounded-full bg-linear-to-r from-orange-500 via-orange-400 to-orange-500" />
-
-      {/* Content */}
-      <div className="relative z-10 px-8 pb-7 pt-8">
-        {/* Header */}
+      <div className="absolute inset-4 flex flex-col justify-between gap-2 p-4">
         <Header certificateNo={certificateNo} />
-
-        {/* Description */}
         <DescriptionCard />
-
-        {/* Top Section */}
-        <section className="mt-5 grid grid-cols-3 gap-4">
+        <section className="grid grid-cols-3 gap-3">
           <CompanyCard {...company} />
-
           <QRCard
             certificateNo={certificateNo}
             verificationUrl={verificationUrl}
@@ -91,21 +99,17 @@ export default function Certificate({
           <NoticeCard />
         </section>
 
-        {/* Vehicle */}
-        <section className="mt-5 grid grid-cols-2 gap-4">
+        <section className=" grid grid-cols-[6fr_5fr] gap-4">
           <VehicleCard {...vehicle} />
-
           <ValidityCard {...validity} />
         </section>
 
-        {/* Bottom */}
-        <section className="mt-5 grid grid-cols-[1.3fr_1fr] gap-8 border-t border-gray-200 pt-5">
+        <section className="grid grid-cols-2 gap-2 border-t border-gray-200 pt-2">
           <ContactCard />
-
-          <SignatureBox />
+          <DigitalCertificate />
+          {/* <Signature /> */}
         </section>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

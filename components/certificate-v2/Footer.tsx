@@ -4,8 +4,8 @@ import { Building2, Globe, Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="mt-6 border-t pt-4">
-      <div className="flex items-center justify-between text-xs text-gray-500">
+    <footer className="py-2 bg-gray-900 px-4 mb-1 rounded-b-md">
+      <div className="flex items-center justify-between text-xs text-gray-100">
         <span>Keep this certificate for future verification.</span>
 
         <span>© 2026 Sultan Tracker • Powered by Forbit Limited</span>

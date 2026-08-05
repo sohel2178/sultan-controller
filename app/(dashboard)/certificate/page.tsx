@@ -1,95 +1,218 @@
 "use client";
 
-import { useState } from "react";
-import { Download, Printer } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { FileCheck2 } from "lucide-react";
 
-import Certificate from "@/components/certificate/Certificate";
-import { Button } from "@/components/ui/button";
+import {
+  Certificate,
+  CertificateListResponse,
+} from "@/types/certificate-types";
+
+import { CertificateAPI } from "@/lib/api";
+
+import CertificateToolbar from "@/components/certificate-main/CertificateToolbar";
+import CertificateTable from "@/components/certificate-main/CertificateTable";
+import CertificateSkeleton from "@/components/certificate-main/CertificateSkeleton";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function CertificatePage() {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Replace with API response
-  const certificate = {
-    certificateNo: "ST-2026-000001",
-    verificationUrl: "https://verify.sultantracker.com/ST-2026-000001",
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-    company: {
-      companyName: "Forbit Limited",
-      brandName: "Sultan Tracker",
-      licenseNo: "BTRC-VTS-XXXXXXXX",
-      hotline: "01409962099",
-      website: "www.sultantracker.com",
-      email: "support@sultantracker.com",
-    },
+  const [page, setPage] = useState(1);
 
-    vehicle: {
-      ownerName: "Sohel Ahmed",
-      registrationNo: "Dhaka Metro-GA-12-3456",
-      vehicleType: "Private Car",
-      chassisNo: "MALXXXXXXXXXXXXXX",
-      engineNo: "G4FGXXXXXXXX",
-      imei: "862292057207029",
-      iccid: "8991101200003204512",
-      deviceModel: "VG03 4G",
-      installationDate: "03 August 2026",
-      installer: "Sultan Tracker Engineering Team",
-    },
+  const [limit] = useState(10);
 
-    validity: {
-      issueDate: "03 August 2026",
-      validUntil: "03 August 2027",
-      remainingDays: 365,
-      gpsStatus: "ACTIVE",
-      deviceStatus: "ONLINE",
-      lastCommunication: "03 Aug 2026 06:20 PM",
-    },
+  const [search, setSearch] = useState("");
+
+  const [status, setStatus] = useState("ALL");
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] =
+    useState<Certificate | null>(null);
+
+  const [pagination, setPagination] = useState<
+    CertificateListResponse["pagination"]
+  >({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 1,
+  });
+
+  const handleDeleteClick = (certificate: Certificate) => {
+    setSelectedCertificate(certificate);
+    setDeleteOpen(true);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleDeleteSuccess = () => {
+    setDeleteOpen(false);
+    setSelectedCertificate(null);
+
+    loadCertificates();
   };
 
-  const handleDownload = () => {
-    // Will implement jsPDF/html2canvas later
-    console.log("Download PDF");
-  };
+  const loadCertificates = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const res = await CertificateAPI.list({
+        page,
+        limit,
+        search,
+        status: status === "ALL" ? undefined : (status as any),
+      });
+
+      setCertificates(res.items);
+
+      setPagination(res.pagination);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, search, status]);
+
+  useEffect(() => {
+    loadCertificates();
+  }, [loadCertificates]);
+
+  function changeSearch(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
+
+  function changeStatus(value: string) {
+    setStatus(value);
+    setPage(1);
+  }
 
   return (
-    <main className="flex h-[calc(100vh-2rem)] flex-col bg-slate-100 p-6">
+    <div className="space-y-6 p-4">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between shrink-0">
+
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+          <FileCheck2 className="h-6 w-6 text-orange-600" />
+        </div>
+
         <div>
-          <h1 className="text-3xl font-bold">GPS Compliance Certificate</h1>
+          <h1 className="text-3xl font-bold">Certificate Management</h1>
 
           <p className="text-muted-foreground">
-            Preview before printing or downloading.
+            Generate, manage and verify GPS Compliance Certificates.
           </p>
         </div>
-
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
-
-          <Button onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
-        </div>
       </div>
 
-      {/* Scrollable Preview */}
-      <div className="flex-1 overflow-y-auto rounded-lg border bg-slate-200 p-6">
-        <Certificate
-          certificateNo={certificate.certificateNo}
-          verificationUrl={certificate.verificationUrl}
-          company={certificate.company}
-          vehicle={certificate.vehicle}
-          validity={certificate.validity}
+      {/* Toolbar */}
+
+      <CertificateToolbar
+        loading={loading}
+        search={search}
+        status={status}
+        onRefresh={loadCertificates}
+        onSearchChange={changeSearch}
+        onStatusChange={changeStatus}
+      />
+
+      {/* Table */}
+
+      {loading ? (
+        <CertificateSkeleton />
+      ) : (
+        <CertificateTable
+          certificates={certificates}
+          page={page}
+          limit={limit}
+          onDeleted={loadCertificates}
         />
-      </div>
-    </main>
+      )}
+
+      {/* Pagination */}
+
+      {!loading && pagination.pages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (page > 1) {
+                    setPage(page - 1);
+                  }
+                }}
+              />
+            </PaginationItem>
+
+            {Array.from({ length: pagination.pages }, (_, i) => i + 1)
+              .filter((p) => {
+                if (pagination.pages <= 7) return true;
+
+                if (p === 1) return true;
+
+                if (p === pagination.pages) return true;
+
+                if (Math.abs(page - p) <= 1) return true;
+
+                return false;
+              })
+              .map((p, index, arr) => {
+                const previous = arr[index - 1];
+
+                const gap = previous !== undefined && p - previous > 1;
+
+                return (
+                  <>
+                    {gap && (
+                      <PaginationItem key={`gap-${p}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        href="#"
+                        isActive={page === p}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPage(p);
+                        }}
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                );
+              })}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (page < pagination.pages) {
+                    setPage(page + 1);
+                  }
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+    </div>
   );
 }

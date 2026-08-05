@@ -10,7 +10,6 @@ import {
 
 const notices = [
   "GPS Subscription Active",
-  "Sultan Tracker Cloud Monitoring",
   "QR Code Verification",
   "Digitally Generated Certificate",
 ];
@@ -19,7 +18,7 @@ export default function NoticeCard() {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
       {/* Header */}
-      <div className="bg-gray-900 px-4 py-3">
+      <div className="bg-gray-900 px-4 py-2.5">
         <h3 className="text-sm font-bold uppercase tracking-widest text-white">
           Verification Status
         </h3>
@@ -64,12 +63,12 @@ export default function NoticeCard() {
         </div>
 
         {/* Footer */}
-        <div className="mt-4 border-t pt-3">
+        {/* <div className="mt-4 border-t pt-3">
           <p className="text-center text-[11px] leading-5 text-gray-500">
             Verify this certificate by scanning the QR code or visiting the
             official verification portal.
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

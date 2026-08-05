@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ certificateNo }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200 pb-4">
+    <header className="border-b border-gray-200 pb-2">
       <div className="grid grid-cols-[170px_1fr_90px] items-center gap-4">
         {/* Left Logo */}
         <div className="flex items-center">
@@ -16,9 +16,9 @@ export default function Header({ certificateNo }: HeaderProps) {
             src="/sultan-logo.png"
             alt="Sultan Tracker"
             width={150}
-            height={55}
+            height={40}
             priority
-            className="h-auto w-auto object-contain"
+            // className="h-auto w-auto object-contain"
           />
         </div>
 
@@ -28,7 +28,7 @@ export default function Header({ certificateNo }: HeaderProps) {
             GPS Vehicle Tracking Service
           </p>
 
-          <h1 className="mt-1 text-[42px] font-black uppercase leading-none tracking-wide text-slate-900">
+          <h1 className="mt-1 text-[36px] font-black uppercase leading-none tracking-wide text-slate-900">
             Compliance Certificate
           </h1>
 
@@ -53,8 +53,8 @@ export default function Header({ certificateNo }: HeaderProps) {
             <Image
               src="/brta-logo.svg"
               alt="BRTA"
-              width={62}
-              height={62}
+              width={100}
+              height={100}
               priority
             />
           </div>
@@ -62,7 +62,7 @@ export default function Header({ certificateNo }: HeaderProps) {
       </div>
 
       {/* Summary Bar */}
-      <div className="mt-5 rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+      <div className="rounded-xl border border-gray-200 bg-linear-to-r from-gray-50 to-white">
         <div className="grid grid-cols-4 divide-x divide-gray-200">
           <SummaryItem label="Certificate No." value={certificateNo} />
 
@@ -89,7 +89,7 @@ interface SummaryItemProps {
 
 function SummaryItem({ label, value, valueClass }: SummaryItemProps) {
   return (
-    <div className="px-5 py-3">
+    <div className="px-3 py-2">
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
         {label}
       </p>

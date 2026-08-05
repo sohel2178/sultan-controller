@@ -16,6 +16,8 @@ import {
   Megaphone,
   TriangleAlert,
   Wrench,
+  BadgeCheck,
+  ReceiptText,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -41,7 +43,8 @@ export default function Sidebar() {
     { label: "Alerts", icon: AlarmClock, href: "/alerts" },
 
     { label: "Commands", icon: Command, href: "/commands" },
-    { label: "Voucher", icon: Command, href: "/voucher" },
+    { label: "Voucher", icon: ReceiptText, href: "/voucher" },
+    { label: "Certificate", icon: BadgeCheck, href: "/certificate" },
     {
       label: "Retail Troubleshoot",
       icon: Wrench,

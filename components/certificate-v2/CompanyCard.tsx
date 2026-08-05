@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Building2, Phone } from "lucide-react";
+import { BadgeCheck, Building2 } from "lucide-react";
 
 interface CompanyCardProps {
   companyName: string;
@@ -15,19 +15,18 @@ export default function CompanyCard({
   companyName,
   brandName,
   licenseNo,
-  hotline,
 }: CompanyCardProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
       {/* Header */}
       <div className="bg-gray-900 px-4 py-2.5">
         <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
-          Company Information
+          Company
         </h3>
       </div>
 
       {/* Body */}
-      <div className="flex-1 space-y-3 p-4">
+      <div className="flex-1 space-y-1 p-2">
         <InfoRow
           icon={<Building2 size={15} />}
           label="Brand"
@@ -43,7 +42,7 @@ export default function CompanyCard({
         <InfoRow
           icon={<BadgeCheck size={15} />}
           label="BTRC VTS License"
-          value={licenseNo}
+          value={licenseNo || "BTRC-VTS-14.32.0000.702.49.074.22.60"}
         />
       </div>
 

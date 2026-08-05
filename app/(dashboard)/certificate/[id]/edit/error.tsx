@@ -1,0 +1,13 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+
+export default function Error({ reset }: { reset: () => void }) {
+  return (
+    <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
+      <h2 className="text-xl font-semibold">Failed to Edit certificate</h2>
+
+      <Button onClick={reset}>Try Again</Button>
+    </div>
+  );
+}

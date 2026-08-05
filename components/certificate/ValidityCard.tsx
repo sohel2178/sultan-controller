@@ -3,6 +3,7 @@
 import { CalendarCheck2, CalendarClock, Clock3, Wifi } from "lucide-react";
 
 import StatusBadge from "./StatusBadge";
+import { formatBangladeshDateTime, formatBangladeshDate } from "@/lib/date";
 
 interface ValidityCardProps {
   issueDate: string;
@@ -23,56 +24,62 @@ export default function ValidityCard({
 }: ValidityCardProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm">
-      <div className="bg-gray-900 px-4 py-3">
+      {/* Header */}
+      <div className="bg-gray-900 px-4 py-2.5">
         <h3 className="text-sm font-bold uppercase tracking-widest text-white">
           Certificate Status
         </h3>
       </div>
 
-      <div className="space-y-5 p-5">
+      {/* Body */}
+      <div className="space-y-4 p-4">
         <Row
-          icon={<CalendarCheck2 size={16} />}
+          icon={<CalendarCheck2 size={14} />}
           label="Issue Date"
-          value={issueDate}
+          value={formatBangladeshDate(issueDate)}
         />
 
         <Row
-          icon={<CalendarClock size={16} />}
+          icon={<CalendarClock size={14} />}
           label="Valid Until"
-          value={validUntil}
+          value={formatBangladeshDate(validUntil)}
         />
 
         <Row
-          icon={<Clock3 size={16} />}
+          icon={<Clock3 size={14} />}
           label="Remaining Days"
           value={`${remainingDays} Days`}
         />
 
-        <div className="flex items-center justify-between border-t pt-4">
-          <span className="text-sm font-medium text-gray-600">GPS Service</span>
+        {/* Status */}
+        <div className="flex items-center justify-between border-t pt-3">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            GPS Service
+          </span>
 
           <StatusBadge status={gpsStatus} />
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
             Device Status
           </span>
 
           <StatusBadge status={deviceStatus} />
         </div>
 
-        <div className="border-t pt-4">
-          <div className="flex gap-3">
-            <Wifi size={16} className="mt-1 text-orange-500" />
+        {/* Last Communication */}
+        <div className="border-t pt-3">
+          <div className="flex gap-2.5">
+            <Wifi size={14} className="mt-0.5 shrink-0 text-orange-500" />
 
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                 Last Communication
               </p>
 
-              <p className="mt-1 font-semibold text-gray-900">
-                {lastCommunication}
+              <p className="mt-0.5 text-[13px] font-semibold leading-5 text-gray-900">
+                {formatBangladeshDateTime(lastCommunication) || "-"}
               </p>
             </div>
           </div>
@@ -90,15 +97,17 @@ interface RowProps {
 
 function Row({ icon, label, value }: RowProps) {
   return (
-    <div className="flex gap-3">
-      <div className="mt-1 text-orange-500">{icon}</div>
+    <div className="flex gap-2.5">
+      <div className="mt-0.5 shrink-0 text-orange-500">{icon}</div>
 
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
           {label}
         </p>
 
-        <p className="mt-1 font-semibold text-gray-900">{value}</p>
+        <p className="mt-0.5 text-[13px] font-semibold leading-5 text-gray-900">
+          {value}
+        </p>
       </div>
     </div>
   );
