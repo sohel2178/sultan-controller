@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { usePathname } from "next/navigation";
 interface CertificateToolbarProps {
   search: string;
   status: string;
@@ -31,6 +31,12 @@ export default function CertificateToolbar({
   onStatusChange,
   onRefresh,
 }: CertificateToolbarProps) {
+  const pathname = usePathname();
+
+  const createHref = pathname.includes("rangs-certificate")
+    ? "/rangs-certificate/new"
+    : "/certificate/new";
+
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 md:flex-row md:items-center md:justify-between">
       {/* Left */}
@@ -75,7 +81,7 @@ export default function CertificateToolbar({
         </Button>
 
         <Button asChild>
-          <Link href="/certificate/new">
+          <Link href={createHref}>
             <Plus className="mr-2 h-4 w-4" />
             New Certificate
           </Link>

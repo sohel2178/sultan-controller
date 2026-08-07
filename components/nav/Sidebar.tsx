@@ -89,6 +89,11 @@ export default function Sidebar() {
         ]
       : []),
 
+    {
+      label: "Rangs Certificate",
+      icon: BadgeCheck,
+      href: "/rangs-certificate",
+    },
     { label: "Rangs Alerts", icon: AlarmClock, href: "/rangs-alerts" },
     { label: "Rangs Commands", icon: Command, href: "/rangs-commands" },
     {

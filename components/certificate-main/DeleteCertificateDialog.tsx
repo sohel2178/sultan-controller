@@ -18,8 +18,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { CertificateAPI } from "@/lib/api";
+import { CertificateAPI, RangsCertificateAPI } from "@/lib/api";
 import { Certificate } from "@/types/certificate-types";
+import { usePathname } from "next/navigation";
 
 interface Props {
   certificate: Certificate;
@@ -30,13 +31,20 @@ export default function DeleteCertificateDialog({
   certificate,
   onDeleted,
 }: Props) {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+
+  const isRangsCertificate = pathname.includes("rangs-certificate");
 
   async function handleDelete() {
     try {
       setLoading(true);
 
-      await CertificateAPI.remove(certificate._id);
+      if (isRangsCertificate) {
+        await RangsCertificateAPI.remove(certificate._id);
+      } else {
+        await CertificateAPI.remove(certificate._id);
+      }
 
       toast.success("Certificate deleted successfully.");
 

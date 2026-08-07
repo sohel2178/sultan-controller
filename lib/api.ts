@@ -15,13 +15,15 @@ import {
   VerifyCertificateResponse,
 } from "@/types/certificate-types";
 
-const mapCertificate = (c: any): Certificate => ({
+const mapCertificate = (c: any, is_rangs: boolean): Certificate => ({
   _id: c._id,
 
   certificateNo: c.certificate_no,
   registrationNo: c.registration_no,
 
-  verificationUrl: `https://verify.sultantracker.com/c/${c._id}`,
+  verificationUrl: is_rangs
+    ? `https://verify.sultantracker.com/c2/${c._id}`
+    : `https://verify.sultantracker.com/c/${c._id}`,
 
   company: {
     companyName: c.company,
@@ -414,7 +416,7 @@ export const CertificateAPI = {
   getById: async (id: string): Promise<Certificate> => {
     const res = await api.get(`/certificate/${id}`);
 
-    return mapCertificate(res.data.data);
+    return mapCertificate(res.data.data, false);
   },
 
   /**
@@ -448,7 +450,7 @@ export const CertificateAPI = {
 
     const res = await api.post("/certificate", payload);
 
-    return mapCertificate(res.data.data);
+    return mapCertificate(res.data.data, false);
   },
 
   /**
@@ -460,7 +462,7 @@ export const CertificateAPI = {
   ): Promise<Certificate> => {
     const res = await api.patch(`/certificate/${id}`, data);
 
-    return mapCertificate(res.data.data);
+    return mapCertificate(res.data.data, false);
   },
 
   /**
@@ -476,7 +478,7 @@ export const CertificateAPI = {
   revoke: async (id: string): Promise<Certificate> => {
     const res = await api.patch(`/certificate/${id}/revoke`);
 
-    return mapCertificate(res.data.data);
+    return mapCertificate(res.data.data, false);
   },
 
   /**
@@ -485,7 +487,7 @@ export const CertificateAPI = {
   print: async (id: string): Promise<Certificate> => {
     const res = await api.get(`/certificate/${id}/print`);
 
-    return mapCertificate(res.data.data);
+    return mapCertificate(res.data.data, false);
   },
 
   /**
@@ -497,7 +499,120 @@ export const CertificateAPI = {
     return {
       success: res.data.success,
       verified: res.data.verified,
-      data: res.data.data ? mapCertificate(res.data.data) : undefined,
+      data: res.data.data ? mapCertificate(res.data.data, false) : undefined,
+      message: res.data.message,
+    };
+  },
+};
+
+export const RangsCertificateAPI = {
+  /**
+   * Certificate List
+   */
+  list: async (
+    query: CertificateQuery = {},
+  ): Promise<CertificateListResponse> => {
+    const res = await api.get("/rangs-certificate", {
+      params: query,
+    });
+
+    return {
+      success: res.data.success,
+      items: res.data.items.map(mapCertificate),
+      pagination: res.data.pagination,
+    };
+  },
+
+  /**
+   * Get Single Certificate
+   */
+  getById: async (id: string): Promise<Certificate> => {
+    const res = await api.get(`/rangs-certificate/${id}`);
+
+    return mapCertificate(res.data.data, true);
+  },
+
+  /**
+   * Create Certificate
+   */
+  create: async (data: CreateCertificateDto): Promise<Certificate> => {
+    const payload = {
+      owner_name: data.ownerName,
+      registration_no: data.registrationNo,
+      vehicle_type: data.vehicleType,
+
+      chassis_no: data.chassisNo,
+      engine_no: data.engineNo,
+
+      imei: data.imei,
+      iccid: data.iccid,
+
+      device_model: data.deviceModel,
+
+      installation_date: data.installationDate,
+      installer: data.installer,
+
+      issue_date: data.issueDate,
+      valid_until: data.validUntil,
+
+      gps_status: data.gpsStatus,
+      device_status: data.deviceStatus,
+
+      notes: data.notes,
+    };
+
+    const res = await api.post("/rangs-certificate", payload);
+
+    return mapCertificate(res.data.data, true);
+  },
+
+  /**
+   * Update Certificate
+   */
+  update: async (
+    id: string,
+    data: UpdateCertificateDto,
+  ): Promise<Certificate> => {
+    const res = await api.patch(`/rangs-certificate/${id}`, data);
+
+    return mapCertificate(res.data.data, true);
+  },
+
+  /**
+   * Delete Certificate
+   */
+  remove: async (id: string): Promise<void> => {
+    await api.delete(`/rangs-certificate/${id}`);
+  },
+
+  /**
+   * Revoke Certificate
+   */
+  revoke: async (id: string): Promise<Certificate> => {
+    const res = await api.patch(`/rangs-certificate/${id}/revoke`);
+
+    return mapCertificate(res.data.data, true);
+  },
+
+  /**
+   * Print Certificate
+   */
+  print: async (id: string): Promise<Certificate> => {
+    const res = await api.get(`/rangs-certificate/${id}/print`);
+
+    return mapCertificate(res.data.data, true);
+  },
+
+  /**
+   * Public Verification
+   */
+  verify: async (certificateNo: string): Promise<VerifyCertificateResponse> => {
+    const res = await api.get(`rangs-certificate/verify/${certificateNo}`);
+
+    return {
+      success: res.data.success,
+      verified: res.data.verified,
+      data: res.data.data ? mapCertificate(res.data.data, true) : undefined,
       message: res.data.message,
     };
   },
