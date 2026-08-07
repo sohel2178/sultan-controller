@@ -68,7 +68,7 @@ export default function ContactCard() {
 
         <Row icon={<Globe size={14} />} text="www.sultantracker.com" />
 
-        <Row icon={<Mail size={14} />} text="support@sultantracker.com" />
+        <Row icon={<Mail size={14} />} text="sultantracker.vts@gmail.com" />
       </div>
     </div>
   );
