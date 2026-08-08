@@ -75,22 +75,6 @@ export default function CertificateViewPage({ params }: PageProps) {
     prepare();
   }, [certificate]);
 
-  async function loadCertificate() {
-    try {
-      setLoading(true);
-
-      const res = await CertificateAPI.getById(id);
-
-      console.log("Certificate:", res);
-
-      setCertificate(res);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">

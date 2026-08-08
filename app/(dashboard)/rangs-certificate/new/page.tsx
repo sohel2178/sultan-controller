@@ -20,6 +20,7 @@ import {
   CertificateFormValues,
 } from "@/lib/certificate-schema";
 import { CreateCertificateDto } from "@/types/certificate-types";
+import CertificatePreview from "@/components/certificate/CertificatePreview";
 
 export default function CreateCertificatePage() {
   const router = useRouter();
@@ -93,11 +94,11 @@ export default function CreateCertificatePage() {
   }
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] gap-6 overflow-hidden p-6">
-      {/* Left */}
-
-      <div className="w-107.5 shrink-0 rounded-xl border bg-background">
-        <div className="border-b px-6 py-4">
+    <main className="flex h-full min-h-0 min-w-0 flex-1 gap-4 overflow-hidden p-2">
+      {/* LEFT */}
+      <section className="flex h-full w-107.5 min-h-0 shrink-0 flex-col overflow-hidden rounded-xl border bg-background">
+        {/* Header */}
+        <div className="shrink-0 border-b px-6 py-4">
           <h1 className="text-xl font-bold">Create Certificate</h1>
 
           <p className="text-sm text-muted-foreground">
@@ -105,7 +106,8 @@ export default function CreateCertificatePage() {
           </p>
         </div>
 
-        <ScrollArea className="h-[calc(100%-73px)]">
+        {/* FORM SCROLL */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="p-6">
             <CertificateForm
               form={form}
@@ -113,13 +115,13 @@ export default function CreateCertificatePage() {
               onSubmit={handleSubmit}
             />
           </div>
-        </ScrollArea>
-      </div>
+        </div>
+      </section>
 
-      {/* Right */}
-
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border bg-muted/20">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+      {/* RIGHT */}
+      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-muted/20">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
           <div>
             <h2 className="font-semibold">Live Preview</h2>
 
@@ -134,8 +136,9 @@ export default function CreateCertificatePage() {
           </Button>
         </div>
 
-        <ScrollArea className="min-h-0 flex-1">
-          <div className="flex justify-center bg-slate-200 p-8">
+        {/* PREVIEW */}
+        <div className="min-h-0 min-w-0 flex-1">
+          <CertificatePreview>
             <Certificate
               certificateNo={preview.certificateNo}
               verificationUrl={preview.verificationUrl}
@@ -143,9 +146,9 @@ export default function CreateCertificatePage() {
               vehicle={preview.vehicle}
               validity={preview.validity}
             />
-          </div>
-        </ScrollArea>
-      </div>
+          </CertificatePreview>
+        </div>
+      </section>
     </main>
   );
 }

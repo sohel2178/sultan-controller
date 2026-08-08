@@ -50,7 +50,7 @@ export default function ContactCard() {
       </h3>
 
       {/* Contact List */}
-      <div className="mt-3 space-y-2.5">
+      <div className="mt-3 space-y-2.5 px-4">
         <Row icon={<Building2 size={14} />} text="Forbit Limited" />
 
         <Row

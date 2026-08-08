@@ -19,6 +19,8 @@ import {
 import { Certificate as CertificateType } from "@/types/certificate-types";
 
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import CertificatePreview from "@/components/certificate/CertificatePreview";
 
 export default function EditCertificatePage() {
   const params = useParams();
@@ -162,23 +164,55 @@ export default function EditCertificatePage() {
   }
 
   return (
-    <div className="grid h-[calc(100vh-90px)] grid-cols-[420px_1fr] gap-6 overflow-hidden">
-      {/* Form */}
+    <main className="flex h-full min-h-0 min-w-0 flex-1 gap-4 overflow-hidden p-2">
+      {/* LEFT */}
+      <section className="flex h-full w-107.5 min-h-0 shrink-0 flex-col overflow-hidden rounded-xl border bg-background">
+        {/* Header */}
+        <div className="shrink-0 border-b px-6 py-4">
+          <h1 className="text-xl font-bold">Update Certificate</h1>
 
-      <div className="overflow-y-auto rounded-xl border bg-card p-6">
-        <CertificateForm
-          form={form}
-          loading={saving}
-          onSubmit={handleSubmit}
-          submitText="Update Certificate"
-        />
-      </div>
+          <p className="text-sm text-muted-foreground">
+            Fill up the information below.
+          </p>
+        </div>
 
-      {/* Preview */}
+        {/* FORM SCROLL */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="p-6">
+            <CertificateForm
+              form={form}
+              loading={loading}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        </div>
+      </section>
 
-      <div className="overflow-y-auto rounded-xl border bg-muted p-6">
-        <Certificate {...preview} />
-      </div>
-    </div>
+      {/* RIGHT */}
+      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-muted/20">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
+          <div>
+            <h2 className="font-semibold">Live Preview</h2>
+
+            <p className="text-sm text-muted-foreground">
+              Changes are reflected instantly.
+            </p>
+          </div>
+
+          <Button onClick={form.handleSubmit(handleSubmit)} disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Update Certificate
+          </Button>
+        </div>
+
+        {/* PREVIEW */}
+        <div className="min-h-0 min-w-0 flex-1">
+          <CertificatePreview>
+            <Certificate {...preview} />
+          </CertificatePreview>
+        </div>
+      </section>
+    </main>
   );
 }
